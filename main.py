@@ -1,12 +1,14 @@
-from flask import Flask
+from flask import Flask, jsonify, send_file
 from flask_cors import CORS
-from flask import jsonify
 from time import time
 from picamera2 import Picamera2
 from picamera2.encoders import H264Encoder
 
+
 class VideoHandler:
-    def __init__(self):
+    def __init__(self,
+                 tag: str):
+        self.tag = tag
         self.picam2 = None
         self.encoder = None
         self.output = None
@@ -14,9 +16,10 @@ class VideoHandler:
     def update(self):
         self.picam2 = Picamera2()
         video_config = self.picam2.create_video_configuration()
+        video_config
         self.picam2.configure(video_config)
         self.encoder = H264Encoder(10000000)
-        self.output = 'test.h264'
+        self.output = self.tag+'_'+str(int(time()))+'.h264'
 
     def start(self):
         self.picam2.start_recording(self.encoder, self.output)
@@ -32,7 +35,7 @@ app = Flask(__name__)
 CORS(app)
 
 
-videoHandler = VideoHandler()
+videoHandler = VideoHandler('raspi_cam1')
 
 @app.route('/')
 def hello():
@@ -53,7 +56,7 @@ def stop():
 
 @app.route('/collect')
 def collect():
-    return jsonify({'message': 'Collect'})
+    return send_file(videoHandler.output)
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True)
