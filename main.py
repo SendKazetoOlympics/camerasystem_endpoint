@@ -81,7 +81,10 @@ def handle_download():
 
 @socketio.on('start_recording')
 def handle_start_recording():
-    raise NotImplementedError
+    print('Start recording at ' + str(time()))
+    # videoHandler.update()
+    # videoHandler.start()
+    videoHandler.status = CAMERA_STATUS.RECORDING
 
 @socketio.on('pause_recording')
 def handle_pause_recording():
@@ -89,7 +92,9 @@ def handle_pause_recording():
 
 @socketio.on('stop_recording')
 def handle_stop_recording():
-    raise NotImplementedError
+    print('Stop recording at ' + str(time()))
+    # videoHandler.stop()
+    videoHandler.status = CAMERA_STATUS.IDLE
 
 if __name__ == '__main__':
     socketio.run(app, host="0.0.0.0", debug=True)
