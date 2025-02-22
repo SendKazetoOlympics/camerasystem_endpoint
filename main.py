@@ -63,6 +63,10 @@ def collect():
 def handle_connect():
     print('client connected')
 
+@socketio.on('ping')
+def handle_ping():
+    print('received ping')
+
 @socketio.on('message')
 def handle_message(message):
     print('received message: ' + message)
