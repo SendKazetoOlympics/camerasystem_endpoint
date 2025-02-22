@@ -74,6 +74,7 @@ def handle_connect():
 @socketio.on('ping')
 def handle_ping():
     print('received ping')
+    return time.time()
 
 @socketio.on('download')
 def handle_download():
