@@ -1,8 +1,9 @@
 from flask import Flask, jsonify, send_file
 from flask_cors import CORS
+from flask_socketio import SocketIO
 from time import time
-from picamera2 import Picamera2
-from picamera2.encoders import H264Encoder
+# from picamera2 import Picamera2
+# from picamera2.encoders import H264Encoder
 
 
 class VideoHandler:
@@ -32,7 +33,7 @@ class VideoHandler:
         self.picam2.close()
 
 app = Flask(__name__)
-CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 
 videoHandler = VideoHandler('raspi_cam1')
@@ -58,5 +59,13 @@ def stop():
 def collect():
     return send_file(videoHandler.output)
 
+@socketio.on('connect')
+def handle_connect():
+    print('client connected')
+
+@socketio.on('message')
+def handle_message(message):
+    print('received message: ' + message)
+
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", debug=True)
+    socketio.run(app, host="0.0.0.0", debug=True)
