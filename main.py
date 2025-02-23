@@ -65,10 +65,6 @@ def handle_ping():
     print('received ping')
     return time()
 
-@socketio.on('download')
-def handle_download():
-    raise NotImplementedError
-
 @socketio.on('start_recording')
 def handle_start_recording():
     print('Start recording at ' + str(time()))
