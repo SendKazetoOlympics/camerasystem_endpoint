@@ -3,8 +3,8 @@ from flask_cors import CORS
 from flask_socketio import SocketIO
 from time import time
 from enum import Enum
-# from picamera2 import Picamera2
-# from picamera2.encoders import H264Encoder
+from picamera2 import Picamera2
+from picamera2.encoders import H264Encoder
 
 class CAMERA_STATUS(Enum):
     IDLE = 0
@@ -49,23 +49,6 @@ videoHandler = VideoHandler('raspi_cam1')
 def hello():
     return 'Hello, World!'
 
-# @app.route('/start')
-# def start():
-#     videoHandler.update()
-#     videoHandler.start()
-#     app.logger.info('Start recording at ' + str(time()))
-#     return jsonify({'message': 'Started recording'})
-
-# @app.route('/pause')
-# def stop():
-#     videoHandler.stop()
-#     app.logger.info('Stop recording at ' + str(time()))
-#     return jsonify({'message': 'Finish recording'})
-
-# @app.route('/collect')
-# def collect():
-#     return send_file(videoHandler.output)
-
 @socketio.on('connect')
 def handle_connect():
     print('client connected')
@@ -83,8 +66,8 @@ def handle_download():
 @socketio.on('start_recording')
 def handle_start_recording():
     print('Start recording at ' + str(time()))
-    # videoHandler.update()
-    # videoHandler.start()
+    videoHandler.update()
+    videoHandler.start()
     videoHandler.status = CAMERA_STATUS.RECORDING
 
 @socketio.on('pause_recording')
@@ -94,7 +77,7 @@ def handle_pause_recording():
 @socketio.on('stop_recording')
 def handle_stop_recording():
     print('Stop recording at ' + str(time()))
-    # videoHandler.stop()
+    videoHandler.stop()
     videoHandler.status = CAMERA_STATUS.IDLE
 
 if __name__ == '__main__':
