@@ -24,7 +24,6 @@ class VideoHandler:
     def update(self):
         self.picam2 = Picamera2()
         video_config = self.picam2.create_video_configuration()
-        video_config
         self.picam2.configure(video_config)
         self.encoder = H264Encoder(10000000)
         self.output = self.tag+'_'+str(int(time()))+'.h264'
@@ -40,6 +39,7 @@ class VideoHandler:
         self.picam2.close()
 
 app = Flask(__name__)
+CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 
@@ -48,6 +48,12 @@ videoHandler = VideoHandler('raspi_cam1')
 @app.route('/')
 def hello():
     return 'Hello, World!'
+
+@app.route('/download')
+def download():
+    # if videoHandler.output is None:
+    #     return 'No video to download'
+    return send_file(videoHandler.output, as_attachment=True)
 
 @socketio.on('connect')
 def handle_connect():
