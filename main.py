@@ -5,6 +5,7 @@ from time import time
 from enum import Enum
 from picamera2 import Picamera2
 from picamera2.encoders import H264Encoder
+from libcamera import controls
 
 class CAMERA_STATUS(Enum):
     IDLE = 0
@@ -25,6 +26,7 @@ class VideoHandler:
         self.picam2 = Picamera2()
         video_config = self.picam2.create_video_configuration()
         self.picam2.configure(video_config)
+        self.picam2.set_controls({"AfMode": controls.AfModeEnum.Continuous})
         self.encoder = H264Encoder(10000000)
         self.output = self.tag+'_'+str(int(time()))+'.h264'
 
