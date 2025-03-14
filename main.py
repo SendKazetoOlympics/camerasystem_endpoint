@@ -43,7 +43,7 @@ class VideoHandler:
     def stop(self):
         self.picam2.stop_recording()
         self.picam2.close()
-        os.system(f"ffmpeg -i {self.output} copy {self.output[:-5]}.mp4")
+        os.system(f"ffmpeg -i {self.output}.h264 copy {self.output[:-5]}.mp4")
 
     def close(self):
         self.picam2.close()
