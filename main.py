@@ -4,7 +4,7 @@ from flask_socketio import SocketIO
 from time import time
 from enum import Enum
 from picamera2 import Picamera2
-from picamera2.encoders import H264Encoder
+from picamera2.encoders import JpegEncoder, H264Encoder
 from libcamera import controls
 import os
 
@@ -34,7 +34,7 @@ class VideoHandler:
         self.picam2.set_controls(
             {"AfMode": controls.AfModeEnum.Continuous, "FrameRate": sensor_mode["fps"]}
         )
-        self.encoder = H264Encoder(framerate=sensor_mode["fps"])
+        self.encoder = H264Encoder(framerate=int(sensor_mode["fps"]))
         self.output = self.tag + "_" + str(int(time()))
 
     def start(self):
