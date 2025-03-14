@@ -5,8 +5,8 @@ from time import time
 from enum import Enum
 from picamera2 import Picamera2
 from picamera2.encoders import H264Encoder
-from picamera2.outputs import FfmpegOutput
 from libcamera import controls
+import os
 
 
 class CAMERA_STATUS(Enum):
@@ -35,14 +35,15 @@ class VideoHandler:
             {"AfMode": controls.AfModeEnum.Continuous, "FrameRate": sensor_mode["fps"]}
         )
         self.encoder = H264Encoder(10000000)
-        self.output = self.tag + "_" + str(int(time())) + ".h264"
+        self.output = self.tag + "_" + str(int(time()))
 
     def start(self):
-        self.picam2.start_recording(self.encoder, self.output)
+        self.picam2.start_recording(self.encoder, self.output + ".h264")
 
     def stop(self):
         self.picam2.stop_recording()
         self.picam2.close()
+        os.system(f"ffmpeg -i {self.output} copy {self.output[:-5]}.mp4")
 
     def close(self):
         self.picam2.close()
