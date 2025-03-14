@@ -34,7 +34,7 @@ class VideoHandler:
         self.picam2.set_controls(
             {"AfMode": controls.AfModeEnum.Continuous, "FrameRate": sensor_mode["fps"]}
         )
-        self.encoder = H264Encoder(10000000)
+        self.encoder = H264Encoder(framerate=sensor_mode["fps"])
         self.output = self.tag + "_" + str(int(time()))
 
     def start(self):
