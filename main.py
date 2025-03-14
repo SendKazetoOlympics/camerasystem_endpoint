@@ -1,10 +1,11 @@
-from flask import Flask, jsonify, send_file
+from flask import Flask, send_file
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from time import time
 from enum import Enum
 from picamera2 import Picamera2
 from picamera2.encoders import H264Encoder
+from picamera2.outputs import FfmpegOutput
 from libcamera import controls
 
 class CAMERA_STATUS(Enum):
@@ -28,10 +29,10 @@ class VideoHandler:
         self.picam2.configure(video_config)
         self.picam2.set_controls({"AfMode": controls.AfModeEnum.Continuous})
         self.encoder = H264Encoder(10000000)
-        self.output = self.tag+'_'+str(int(time()))+'.h264'
+        self.output = self.tag+'_'+str(int(time()))+'.mp4'
 
     def start(self):
-        self.picam2.start_recording(self.encoder, self.output)
+        self.picam2.start_recording(self.encoder, FfmpegOutput(self.output))
 
     def stop(self):
         self.picam2.stop_recording()
