@@ -38,7 +38,7 @@ class VideoHandler:
         self.output = self.tag + "_" + str(int(time()))
 
     def start(self):
-        self.picam2.start_recording(self.encoder, self.output + ".mp4")
+        self.picam2.start_recording(self.encoder, self.output + ".h264")
 
     def stop(self):
         self.picam2.stop_recording()
