@@ -66,7 +66,7 @@ def hello():
 def download():
     if videoHandler.output is None:
         return "No video to download"
-    return send_file(videoHandler.output, as_attachment=True)
+    return send_file(videoHandler.output+'.mp4', as_attachment=True)
 
 
 @socketio.on("connect")
