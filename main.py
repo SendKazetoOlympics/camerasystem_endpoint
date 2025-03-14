@@ -25,7 +25,8 @@ class VideoHandler:
     
     def update(self):
         self.picam2 = Picamera2()
-        video_config = self.picam2.create_video_configuration()
+        video_config = self.picam2.sensor_modes[1]
+        assert video_config['fps'] > 30, "fps must be greater than 30"
         self.picam2.configure(video_config)
         self.picam2.set_controls({"AfMode": controls.AfModeEnum.Continuous})
         self.encoder = H264Encoder(10000000)
