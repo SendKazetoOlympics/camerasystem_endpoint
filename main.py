@@ -29,10 +29,10 @@ class VideoHandler:
         self.picam2.configure(video_config)
         self.picam2.set_controls({"AfMode": controls.AfModeEnum.Continuous})
         self.encoder = H264Encoder(10000000)
-        self.output = self.tag+'_'+str(int(time()))+'.mp4'
+        self.output = self.tag+'_'+str(int(time()))+'.h264'
 
     def start(self):
-        self.picam2.start_recording(self.encoder, FfmpegOutput(self.output))
+        self.picam2.start_recording(self.encoder, self.output)
 
     def stop(self):
         self.picam2.stop_recording()
@@ -54,8 +54,8 @@ def hello():
 
 @app.route('/download')
 def download():
-    # if videoHandler.output is None:
-    #     return 'No video to download'
+    if videoHandler.output is None:
+        return 'No video to download'
     return send_file(videoHandler.output, as_attachment=True)
 
 @socketio.on('connect')
