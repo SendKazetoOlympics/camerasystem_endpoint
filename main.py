@@ -39,7 +39,10 @@ class VideoHandler:
             {"AfMode": controls.AfModeEnum.Continuous, "FrameRate": sensor_mode["fps"]}
         )
         self.encoder = H264Encoder(framerate=int(sensor_mode["fps"]))
-        self.output = self.tag + "_" + str(int(time()))
+        # Ensure output directory exists
+        output_dir = os.path.join(os.path.dirname(__file__), "output")
+        os.makedirs(output_dir, exist_ok=True)
+        self.output = os.path.join(output_dir, self.tag + "_" + str(int(time())))
 
     def start(self):
         self.start_timestamp = time()
