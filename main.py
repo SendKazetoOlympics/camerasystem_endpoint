@@ -1,4 +1,4 @@
-from flask import Flask, send_file
+from flask import Flask, send_file, jsonify, request
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from time import time
@@ -23,6 +23,8 @@ class VideoHandler:
         self.encoder = None
         self.output = None
         self.status = CAMERA_STATUS.DISCONNECTED
+        self.start_timestamp = None
+        self.stop_timestamp = None
 
     def update(self):
         self.picam2 = Picamera2()
@@ -38,15 +40,23 @@ class VideoHandler:
         self.output = self.tag + "_" + str(int(time()))
 
     def start(self):
+        self.start_timestamp = time()
         self.picam2.start_recording(self.encoder, self.output + ".h264")
 
     def stop(self):
+        self.stop_timestamp = time()
         self.picam2.stop_recording()
         self.picam2.close()
         os.system(f"ffmpeg -i {self.output}.h264 -c copy {self.output}.mp4")
 
     def close(self):
         self.picam2.close()
+
+    def get_timestamps(self):
+        return {
+            "start": self.start_timestamp,
+            "stop": self.stop_timestamp
+        }
 
 
 app = Flask(__name__)
@@ -64,6 +74,18 @@ def hello():
 
 @app.route("/download")
 def download():
+    if videoHandler.output is None:
+        return "No video to download"
+    # Return timestamps and download URL as JSON
+    timestamps = videoHandler.get_timestamps()
+    download_url = request.host_url.rstrip('/') + '/download_video'
+    return jsonify({
+        "download_url": download_url,
+        "timestamps": timestamps
+    })
+
+@app.route("/download_video")
+def download_video():
     if videoHandler.output is None:
         return "No video to download"
     return send_file(videoHandler.output+'.mp4', as_attachment=True)
