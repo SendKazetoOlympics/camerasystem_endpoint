@@ -108,7 +108,6 @@ def download():
         return "No video to download"
     # Return timestamps and download URL as JSON
     timestamps = videoHandler.get_timestamps()
-    print("Timestamps:", timestamps)
     download_url = request.host_url.rstrip('/') + '/download_video'
     return jsonify({
         "download_url": download_url,
