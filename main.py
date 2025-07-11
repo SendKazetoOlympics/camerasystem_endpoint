@@ -44,6 +44,7 @@ class VideoHandler:
         self.output = os.path.join(output_dir, self.tag + "_" + str(int(time())))
 
     def start(self):
+        self.time_stamp_array = []
         def apply_timestamp(request):
             self.time_stamp_array.append(time())
 
