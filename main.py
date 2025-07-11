@@ -24,8 +24,7 @@ class VideoHandler:
         self.encoder = None
         self.output = None
         self.status = CAMERA_STATUS.DISCONNECTED
-        self.start_timestamp = None
-        self.stop_timestamp = None
+        self.time_stamp_array = []
         self.mediamtx_process = None
 
     def update(self):
@@ -45,22 +44,20 @@ class VideoHandler:
         self.output = os.path.join(output_dir, self.tag + "_" + str(int(time())))
 
     def start(self):
-        self.start_timestamp = time()
+        def apply_timestamp(request):
+            self.time_stamp_array.append(time())
+
+        self.picam2.pre_callback = apply_timestamp
         self.picam2.start_recording(self.encoder, self.output + ".h264")
 
     def stop(self):
-        self.stop_timestamp = time()
         self.picam2.stop_recording()
         self.picam2.close()
         os.system(f"ffmpeg -i {self.output}.h264 -c copy {self.output}.mp4")
 
-    def close(self):
-        self.picam2.close()
-
     def get_timestamps(self):
         return {
-            "start": self.start_timestamp,
-            "stop": self.stop_timestamp
+            "timestamps": self.time_stamp_array,
         }
 
     def start_mediamtx(self):
