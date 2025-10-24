@@ -33,7 +33,7 @@ class VideoHandler:
         self.picam2 = Picamera2()
         sensor_mode = self.picam2.sensor_modes[1]
         video_config = self.picam2.create_video_configuration(
-            sensor={"output_size": sensor_mode["size"]}
+            sensor={"output_size": sensor_mode["size"]}, buffer_count=12
         )
         self.picam2.configure(video_config)
         self.picam2.set_controls(
