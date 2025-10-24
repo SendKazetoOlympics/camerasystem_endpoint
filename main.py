@@ -10,7 +10,6 @@ from libcamera import controls
 import os
 import argparse
 import threading
-import time
 
 
 class CAMERA_STATUS(Enum):
