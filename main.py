@@ -8,6 +8,7 @@ from picamera2 import Picamera2
 from picamera2.encoders import JpegEncoder, H264Encoder
 from libcamera import controls
 import os
+import argparse
 
 
 class CAMERA_STATUS(Enum):
@@ -18,7 +19,7 @@ class CAMERA_STATUS(Enum):
 
 
 class VideoHandler:
-    def __init__(self, tag: str):
+    def __init__(self, tag: str, mode: str = "server"):
         self.tag = tag
         self.picam2 = None
         self.encoder = None
@@ -26,6 +27,7 @@ class VideoHandler:
         self.status = CAMERA_STATUS.DISCONNECTED
         self.time_stamp_array = []
         self.mediamtx_process = None
+        self.mode = mode
 
     def update(self):
         self.picam2 = Picamera2()
@@ -35,9 +37,16 @@ class VideoHandler:
         )
         self.picam2.configure(video_config)
         self.picam2.set_controls(
-            {"AfMode": controls.AfModeEnum.Continuous, "FrameRate": sensor_mode["fps"]}
+            {
+                "AfMode": controls.AfModeEnum.Continuous,
+                "FrameRate": sensor_mode["fps"],
+                "SyncMode": controls.rpi.SyncModeEnum.Server
+                if self.mode == "server"
+                else controls.rpi.SyncModeEnum.Client,
+            }
         )
         self.encoder = H264Encoder(framerate=int(sensor_mode["fps"]))
+        self.encoder.sync_enable = True
         # Ensure output directory exists
         output_dir = os.path.join(os.path.dirname(__file__), "output")
         os.makedirs(output_dir, exist_ok=True)
@@ -45,11 +54,14 @@ class VideoHandler:
 
     def start(self):
         self.time_stamp_array = []
+
         def apply_timestamp(request):
             self.time_stamp_array.append(time())
 
         self.picam2.pre_callback = apply_timestamp
         self.picam2.start_recording(self.encoder, self.output + ".h264")
+        print("Waiting for sync...")
+        self.encoder.sync.wait()
 
     def stop(self):
         self.picam2.stop_recording()
@@ -93,8 +105,16 @@ app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-
-videoHandler = VideoHandler("raspi_cam1")
+arg_parser = argparse.ArgumentParser(description="Raspberry Pi Camera Video Handler")
+arg_parser.add_argument(
+    "--mode",
+    type=str,
+    choices=["server", "client"],
+    default="server",
+    help="Operation mode: server or client for synchronization",
+)
+args = arg_parser.parse_args()
+videoHandler = VideoHandler("raspi_cam1", args.mode)
 
 
 @app.route("/")
@@ -108,17 +128,15 @@ def download():
         return "No video to download"
     # Return timestamps and download URL as JSON
     timestamps = videoHandler.get_timestamps()
-    download_url = request.host_url.rstrip('/') + '/download_video'
-    return jsonify({
-        "download_url": download_url,
-        "timestamps": timestamps
-    })
+    download_url = request.host_url.rstrip("/") + "/download_video"
+    return jsonify({"download_url": download_url, "timestamps": timestamps})
+
 
 @app.route("/download_video")
 def download_video():
     if videoHandler.output is None:
         return "No video to download"
-    return send_file(videoHandler.output+'.mp4', as_attachment=True)
+    return send_file(videoHandler.output + ".mp4", as_attachment=True)
 
 
 @socketio.on("connect")
@@ -157,6 +175,7 @@ def handle_stop_recording():
 def start_mediamtx():
     result, code = videoHandler.start_mediamtx()
     return jsonify(result), code
+
 
 @app.route("/stop_mediamtx", methods=["POST"])
 def stop_mediamtx():
