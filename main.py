@@ -9,6 +9,8 @@ from picamera2.encoders import JpegEncoder, H264Encoder
 from libcamera import controls
 import os
 import argparse
+import threading
+import time
 
 
 class CAMERA_STATUS(Enum):
@@ -62,6 +64,9 @@ class VideoHandler:
         self.picam2.start_recording(self.encoder, self.output + ".h264")
         print("Waiting for sync...")
         self.encoder.sync.wait()
+        timer = threading.Timer(5.0, self.encoder.sync.wait())
+        timer.start()
+
 
     def stop(self):
         self.picam2.stop_recording()
