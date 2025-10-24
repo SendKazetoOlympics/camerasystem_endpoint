@@ -61,8 +61,8 @@ class VideoHandler:
 
         self.picam2.pre_callback = apply_timestamp
         self.picam2.start_recording(self.encoder, self.output + ".h264")
-        # print("Waiting for sync...")
-        # self.encoder.sync.wait()
+        print("Waiting for sync...")
+        self.encoder.sync.wait()
 
 
     def stop(self):
