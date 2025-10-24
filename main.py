@@ -57,7 +57,7 @@ class VideoHandler:
         self.time_stamp_array = []
 
         def apply_timestamp(request):
-            self.time_stamp_array.append(self.picam2.capture_metadata()['SensorTimestamp'])
+            self.time_stamp_array.append(time())
 
         self.picam2.pre_callback = apply_timestamp
         self.picam2.start_recording(self.encoder, self.output + ".h264")
