@@ -63,8 +63,6 @@ class VideoHandler:
         self.picam2.start_recording(self.encoder, self.output + ".h264")
         print("Waiting for sync...")
         self.encoder.sync.wait()
-        timer = threading.Timer(5.0, self.encoder.sync.wait)
-        timer.start()
 
 
     def stop(self):
